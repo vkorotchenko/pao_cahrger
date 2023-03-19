@@ -9,12 +9,13 @@ int error_state = 0;
 
 unsigned char voltamp[8] = {highByte(MAX_VOLTAGE), lowByte(MAX_VOLTAGE), highByte(MAX_AMPS), lowByte(MAX_AMPS), 0x00, 0x00, 0x00, 0x00};
 
-unsigned char len = 0;  // Length of received CAN message of either charger
-unsigned char buf[8];   // Buffer for data from CAN message of either charger
+unsigned char len = 0; // Length of received CAN message of either charger
+unsigned char buf[8];  // Buffer for data from CAN message of either charger
+float pv_voltage;
+float pv_current;
 
-
-mcp2515_can CAN(SPI_CS_PIN);
-SimpleTimer timer; 
+    mcp2515_can CAN(SPI_CS_PIN);
+SimpleTimer timer;
 
 void canRead()
 {
@@ -28,7 +29,7 @@ void canRead()
     { // CAN Bus ID from TC charger protocol 1430
       for (int i = 0; i < len; i++)
 
-      Serial.println("TC CAN Data received!");
+        Serial.println("TC CAN Data received!");
       Serial.print("CAN ID: ");
       Serial.print(receiveId, HEX); // Output ID
 
@@ -47,13 +48,13 @@ void canRead()
 
       Serial.println(); // Prints an empty paragraph
 
+      pv_current = (((float)buf[2] * 256.0) + ((float)buf[3])) / 10.0; // highByte/lowByte + offset
+      pv_voltage = (((float)buf[0] * 256.0) + ((float)buf[1])) / 10.0; // highByte/lowByte + offset
+
       Serial.print("Charging voltage: ");
-      float pv_voltage = (((float)buf[0] * 256.0) + ((float)buf[1])) / 10.0; // highByte/lowByte + offset
       Serial.print(pv_voltage);
       Serial.print(" V / Charging current: ");
-      float pv_current = (((float)buf[2] * 256.0) + ((float)buf[3])) / 10.0; // highByte/lowByte + offset
       Serial.print(pv_current);
-
       Serial.println(" A"); // Paragraph
 
       switch (buf[4])
@@ -144,27 +145,55 @@ void ledHandler()
   }
 }
 
-void blinkIndicatorLeds(int count) {
+void blinkIndicatorLeds(int count)
+{
 
-        digitalWrite(GREEN_PIN, LOW);
-        digitalWrite(ORANGE_PIN, LOW);
-        digitalWrite(RED_PIN, HIGH);
-  
-      for (int i = 0; i < count; i++) {
-        digitalWrite(ORANGE_PIN, HIGH);
-        delay(200);
-        digitalWrite(ORANGE_PIN, LOW);
-        delay(200);
-      }
+  digitalWrite(GREEN_PIN, LOW);
+  digitalWrite(ORANGE_PIN, LOW);
+  digitalWrite(RED_PIN, HIGH);
+
+  for (int i = 0; i < count; i++)
+  {
+    digitalWrite(ORANGE_PIN, HIGH);
+    delay(200);
+    digitalWrite(ORANGE_PIN, LOW);
+    delay(200);
+  }
 }
 
-void setIndicatorLeds() {
-  //TODO state of charge
-        digitalWrite(GREEN_PIN, HIGH);
-        digitalWrite(ORANGE_PIN, LOW);
-        digitalWrite(RED_PIN, LOW);
+int getSOC()
+{
+  if ( pv_voltage < NOMINAL_VOLTAGE * MID_CHARGE_MULTIPLIER) {
+    return 1;
+  }
+  if ( pv_voltage < NOMINAL_VOLTAGE * FULL_CHARGE_MULTIPLIER) {
+    return 2;
+  }
+  if ( pv_voltage > NOMINAL_VOLTAGE * FULL_CHARGE_MULTIPLIER) {
+    return 3;
+  }
 }
 
+void setIndicatorLeds()
+{
+  digitalWrite(GREEN_PIN, LOW);
+  digitalWrite(ORANGE_PIN, LOW);
+  digitalWrite(RED_PIN, LOW);
+  int soc = getSOC();
+
+  if (soc < 1)
+  {
+    digitalWrite(RED_PIN, HIGH);
+  }
+  if (soc < 2)
+  {
+    digitalWrite(ORANGE_PIN, HIGH);
+  }
+  if (soc < 3)
+  {
+    digitalWrite(GREEN_PIN, HIGH);
+  }
+}
 
 void tccHandler()
 { // Cyclic function called by the timer
@@ -181,7 +210,7 @@ void tccHandler()
   Serial.println(" V)");
   // Send message and output results
   unsigned char voltamp[8] = {highByte(MAX_VOLTAGE), lowByte(MAX_VOLTAGE), highByte(MAX_AMPS), lowByte(MAX_AMPS), 0x00, 0x00, 0x00, 0x00}; // Regenerate the message
-  Serial.println(canWrite(voltamp, tcc_incoming_can_id));                                                                                         // Send message and output results
+  Serial.println(canWrite(voltamp, tcc_incoming_can_id));                                                                                  // Send message and output results
   canRead();                                                                                                                               // Call read function of charger
 
   Serial.println(); // Print a blank line
@@ -202,13 +231,13 @@ void setup()
   delay(2000);
 
   while (CAN_OK != CAN.begin(CAN_500KBPS))
-  { 
+  {
     Serial.println("waiting for CAN to intialize");
     digitalWrite(ORANGE_PIN, !digitalRead(ORANGE_PIN));
     delay(200);
   }
   Serial.println("CAN initialization successful");
-  timer.setInterval(tcc_send_interval, tccHandler); 
+  timer.setInterval(tcc_send_interval, tccHandler);
   timer.setInterval(led_reset_interval, ledHandler);
 }
 
