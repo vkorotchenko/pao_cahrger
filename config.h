@@ -26,12 +26,19 @@ PINS
 #define tcc_send_interval 1000
 #define led_reset_interval 1000
 
+
+#define FULL_CHARGE_MULTIPLIER 1.046875
+#define MID_CHARGE_MULTIPLIER 1.040625
+
 /*
  * HARD CODED PARAMETERS
  */
 
 #define CAN_SPEED			500		//can speed in 1000 kbps
-#define MAX_VOLTAGE			3200	//max volatage for the battery pack in 1/10th of a volt
+#define MAX_VOLTAGE		3650	//max volatage for the battery pack in 1/10th of a volt
+#define NOMINAL_VOLTAGE		3200	//nominal volatage for the battery pack in 1/10th of a volt
+#define MIN_VOLTAGE         2500    //min voltage for 
+#define TARGER_PERCENTAGE   900     // if we are limiting charging to x percente for battery life protection in thenth of a percent
 #define MAX_AMPS			200		//Max amp for the charger in 1/10 of an AMP
 #define MAX_CAHRGE_TIME		200		//not used yet TODO
 
