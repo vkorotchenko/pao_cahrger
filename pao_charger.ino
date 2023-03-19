@@ -45,12 +45,11 @@ void canRead()
         Serial.print(" "); // Spaces
       }
 
-      Logger::log(); // Prints an empty paragraph
 
       pv_current = (((float)buf[2] * 256.0) + ((float)buf[3])) / 10.0; // highByte/lowByte + offset
       pv_voltage = (((float)buf[0] * 256.0) + ((float)buf[1])) / 10.0; // highByte/lowByte + offset
 
-      Logger::log(("Charging voltage: %f V , current: %f A ", pv_voltage, pv_current);
+      Logger::log("Charging voltage: %f V , current: %f A ", pv_voltage, pv_current);
       switch (buf[4])
       { // Read out error byte
 
@@ -192,10 +191,10 @@ void tccHandler()
 
   // Send message and output results
   unsigned char voltamp[8] = {highByte(MAX_VOLTAGE), lowByte(MAX_VOLTAGE), highByte(MAX_AMPS), lowByte(MAX_AMPS), 0x00, 0x00, 0x00, 0x00}; // Regenerate the message
-  String canWrite = (canWrite(voltamp, tcc_incoming_can_id));                                                                                  // Send message and output results
+  String canWriteVal = canWrite(voltamp, tcc_incoming_can_id);                                                                                  // Send message and output results
   canRead();                                                                                                                               // Call read function of charger
 
-  Logger::log("canWrite result: %s", canWrite); // Print a blank line
+  Logger::log("canWrite result: %s", canWriteVal); // Print a blank line
 }
 
 void setup()
