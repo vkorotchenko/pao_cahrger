@@ -4,6 +4,7 @@ int error_state = 0;
 
 #include <SimpleTimer.h>
 #include "mcp2515_can.h"
+#include "Logger.h"
 
 #include "config.h"
 
@@ -29,9 +30,7 @@ void canRead()
     { // CAN Bus ID from TC charger protocol 1430
       for (int i = 0; i < len; i++)
 
-        Serial.println("TC CAN Data received!");
-      Serial.print("CAN ID: ");
-      Serial.print(receiveId, HEX); // Output ID
+        Logger::log("TC CAN Data received! CAN Id: %X", receiveId);
 
       Serial.print(" / CAN Data: ");
       for (int i = 0; i < len; i++)
@@ -46,43 +45,37 @@ void canRead()
         Serial.print(" "); // Spaces
       }
 
-      Serial.println(); // Prints an empty paragraph
 
       pv_current = (((float)buf[2] * 256.0) + ((float)buf[3])) / 10.0; // highByte/lowByte + offset
       pv_voltage = (((float)buf[0] * 256.0) + ((float)buf[1])) / 10.0; // highByte/lowByte + offset
 
-      Serial.print("Charging voltage: ");
-      Serial.print(pv_voltage);
-      Serial.print(" V / Charging current: ");
-      Serial.print(pv_current);
-      Serial.println(" A"); // Paragraph
-
+      Logger::log("Charging voltage: %f V , current: %f A ", pv_voltage, pv_current);
       switch (buf[4])
       { // Read out error byte
 
       case B00000001:
         error_state = buf[4];
-        Serial.println("Error: hardware error");
+        Logger::log("Error: hardware error");
         break;
       case B00000010:
         error_state = buf[4];
-        Serial.println("Error: overheating");
+        Logger::log("Error: overheating");
         break;
       case B00000100:
         error_state = buf[4];
-        Serial.println("Error: input voltage not allowed");
+        Logger::log("Error: input voltage not allowed");
         break;
       case B00001000:
         error_state = buf[4];
-        Serial.println("Error: battery not connected");
+        Logger::log("Error: battery not connected");
         break;
       case B00010000:
         error_state = buf[4];
-        Serial.println("Error: CAN bus error");
+        Logger::log("Error: CAN bus error");
         break;
       case B00001100:
         error_state = buf[4];
-        Serial.println("Error: No input voltage");
+        Logger::log("Error: No input voltage");
         break;
       default:
         error_state = 0;
@@ -92,10 +85,6 @@ void canRead()
   }
 }
 
-/************************************************
-** Function name:           canWrite
-** Descriptions:            write CAN message
-*************************************************/
 String canWrite(unsigned char data[8], unsigned long int id)
 {
 
@@ -198,22 +187,14 @@ void setIndicatorLeds()
 void tccHandler()
 { // Cyclic function called by the timer
 
-  Serial.print("Set individual charging current: ");
-  Serial.print((float)MAX_AMPS / 10.0); // Output current setpoint
-  Serial.println(" A");
-  Serial.print("Total charging current: ");
-  Serial.print((float)MAX_AMPS * 10.0); // Output current setpoint
-  Serial.println(" A");
-  Serial.print(" % (Max voltage ");
+  Logger::log("Set individual charging current: %f A . Target Charging Voltage: %f V ",(float)MAX_AMPS / 10.0, (float)MAX_VOLTAGE / 10.0 ); 
 
-  Serial.print((float)MAX_VOLTAGE / 10.0); // Target SOC to stop charge
-  Serial.println(" V)");
   // Send message and output results
   unsigned char voltamp[8] = {highByte(MAX_VOLTAGE), lowByte(MAX_VOLTAGE), highByte(MAX_AMPS), lowByte(MAX_AMPS), 0x00, 0x00, 0x00, 0x00}; // Regenerate the message
-  Serial.println(canWrite(voltamp, tcc_incoming_can_id));                                                                                  // Send message and output results
+  String canWriteVal = canWrite(voltamp, tcc_incoming_can_id);                                                                                  // Send message and output results
   canRead();                                                                                                                               // Call read function of charger
 
-  Serial.println(); // Print a blank line
+  Logger::log("canWrite result: %s", canWriteVal); // Print a blank line
 }
 
 void setup()
@@ -232,11 +213,14 @@ void setup()
 
   while (CAN_OK != CAN.begin(CAN_500KBPS))
   {
-    Serial.println("waiting for CAN to intialize");
+    Logger::log("waiting for CAN to intialize");
     digitalWrite(ORANGE_PIN, !digitalRead(ORANGE_PIN));
     delay(200);
   }
-  Serial.println("CAN initialization successful");
+  digitalWrite(ORANGE_PIN, LOW);
+  digitalWrite(GREEN_PIN, HIGH);
+
+  Logger::log("CAN initialization successful");
   timer.setInterval(tcc_send_interval, tccHandler);
   timer.setInterval(led_reset_interval, ledHandler);
 }
