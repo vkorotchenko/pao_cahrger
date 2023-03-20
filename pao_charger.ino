@@ -5,7 +5,7 @@
 #include "SerialConsole.h"
 
 ;
-unsigned char voltamp[8] = {highByte(Config::getMaxVoltage()), lowByte(Config::getMaxVoltage()), highByte(Config::getMaxCurrent()), lowByte(Config::getMaxCurrent()), 0x00, 0x00, 0x00, 0x00};
+unsigned char voltamp[8] = {highByte(Config::getTargetVoltage()), lowByte(Config::getTargetVoltage()), highByte(Config::getMaxCurrent()), lowByte(Config::getMaxCurrent()), 0x00, 0x00, 0x00, 0x00};
 
 unsigned char len = 0; // Length of received CAN message of either charger
 unsigned char buf[8];  // Buffer for data from CAN message of either charger
@@ -206,13 +206,13 @@ bool checkTimer(){
 void tccHandler()
 { // Cyclic function called by the timer
 
-  Logger::log("Set individual charging current: %f A . Target Charging Voltage: %f V ",(float)Config::getMaxCurrent() / 10.0, (float)Config::getMaxVoltage() / 10.0 ); 
+  Logger::log("Set individual charging current: %f A . Target Charging Voltage: %f V ",(float)Config::getMaxCurrent() / 10.0, (float)Config::getTargetVoltage() / 10.0 ); 
 
   isCharging = checkTimer();
   char enableBit = isCharging ? 0x00 :0x01;
 
   // Send message and output results
-  unsigned char voltamp[8] = {highByte(Config::getMaxVoltage()), lowByte(Config::getMaxVoltage()), highByte(Config::getMaxCurrent()), lowByte(Config::getMaxCurrent()), enableBit, 0x00, 0x00, 0x00}; // Regenerate the message
+  unsigned char voltamp[8] = {highByte(Config::getTargetVoltage()), lowByte(Config::getTargetVoltage()), highByte(Config::getMaxCurrent()), lowByte(Config::getMaxCurrent()), enableBit, 0x00, 0x00, 0x00}; // Regenerate the message
   String canWriteVal = canWrite(voltamp, tcc_incoming_can_id);                                                                                  // Send message and output results
   canRead();                                                                                                                               // Call read function of charger
 

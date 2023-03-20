@@ -43,6 +43,13 @@ int Config::getValueFromEEPROM(int def,int addr ) {
     return target;
 }
 
+int Config::getTargetVoltage() {
+    if(Config::getTargetPercentage() == 0) {
+        return Config::getMaxVoltage();
+    }
+    return Config::getMaxVoltage() * (Config::getTargetPercentage() / 1000);
+}
+
 void Config::printAllValues()
 {
     Logger::print("=== EEPROM values ===");

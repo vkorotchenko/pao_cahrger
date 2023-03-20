@@ -40,7 +40,7 @@ PINS
 #define MAX_VOLTAGE 3650      // max volatage for the battery pack in 1/10th of a volt
 #define NOMINAL_VOLTAGE 3200  // nominal volatage for the battery pack in 1/10th of a volt
 #define MIN_VOLTAGE 2500      // min voltage for
-#define TARGET_PERCENTAGE 900 // if we are limiting charging to x percente for battery life protection in thenth of a percent
+#define TARGET_PERCENTAGE 900 // if we are limiting charging to x percente for battery life protection in thenth of a percent  0 to disable
 #define MAX_AMPS 200          // Max amp for the charger in 1/10 of an AMP
 #define MAX_CHARGE_TIME 200   // time in seconds before shutting off, 0 to disable 
 
@@ -66,6 +66,7 @@ public:
     static int getCanSpeed();
     static int getTargetPercentage();
     static int getMaxChargeTime();
+    static int getTargetVoltage();
 
     static void printAllValues();
     static void setNominalVoltage(int newValue);
