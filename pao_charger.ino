@@ -216,6 +216,8 @@ void tccHandler()
   String canWriteVal = canWrite(voltamp, tcc_incoming_can_id);                                                                                  // Send message and output results
   canRead();                                                                                                                               // Call read function of charger
 
+  Logger::log("=== Charging status === ");
+  Logger::log("isCharging: %T target Voltage: %d V max amp: %d A", isCharging,Config::getTargetVoltage(), Config::getMaxCurrent());
   Logger::log("canWrite result: %s", canWriteVal); // Print a blank line
   if (Config::getMaxChargeTime() != 0) {
    Logger::log("Running time limit enabled, current time: %d s",(millis()-charge_start_time)/1000);
