@@ -1,22 +1,21 @@
-#include "config.h"
-
-int error_state = 0;
-
 #include <SimpleTimer.h>
 #include "mcp2515_can.h"
 #include "Logger.h"
+#include "Config.h"
+#include "SerialConsole.h"
 
-#include "config.h"
-
-unsigned char voltamp[8] = {highByte(MAX_VOLTAGE), lowByte(MAX_VOLTAGE), highByte(MAX_AMPS), lowByte(MAX_AMPS), 0x00, 0x00, 0x00, 0x00};
+;
+unsigned char voltamp[8] = {highByte(Config::getMaxVoltage()), lowByte(Config::getMaxVoltage()), highByte(Config::getMaxCurrent()), lowByte(Config::getMaxCurrent()), 0x00, 0x00, 0x00, 0x00};
 
 unsigned char len = 0; // Length of received CAN message of either charger
 unsigned char buf[8];  // Buffer for data from CAN message of either charger
+int error_state = 0;
 float pv_voltage;
 float pv_current;
 
-    mcp2515_can CAN(SPI_CS_PIN);
+mcp2515_can CAN(SPI_CS_PIN);
 SimpleTimer timer;
+SerialConsole *serialConsole;
 
 void canRead()
 {
@@ -152,13 +151,13 @@ void blinkIndicatorLeds(int count)
 
 int getSOC()
 {
-  if ( pv_voltage < NOMINAL_VOLTAGE * MID_CHARGE_MULTIPLIER) {
+  if ( pv_voltage < Config::getNominalVoltage() * MID_CHARGE_MULTIPLIER) {
     return 1;
   }
-  if ( pv_voltage < NOMINAL_VOLTAGE * FULL_CHARGE_MULTIPLIER) {
+  if ( pv_voltage < Config::getNominalVoltage() * FULL_CHARGE_MULTIPLIER) {
     return 2;
   }
-  if ( pv_voltage > NOMINAL_VOLTAGE * FULL_CHARGE_MULTIPLIER) {
+  if ( pv_voltage > Config::getNominalVoltage() * FULL_CHARGE_MULTIPLIER) {
     return 3;
   }
 }
@@ -187,10 +186,10 @@ void setIndicatorLeds()
 void tccHandler()
 { // Cyclic function called by the timer
 
-  Logger::log("Set individual charging current: %f A . Target Charging Voltage: %f V ",(float)MAX_AMPS / 10.0, (float)MAX_VOLTAGE / 10.0 ); 
+  Logger::log("Set individual charging current: %f A . Target Charging Voltage: %f V ",(float)Config::getMaxCurrent() / 10.0, (float)Config::getMaxVoltage() / 10.0 ); 
 
   // Send message and output results
-  unsigned char voltamp[8] = {highByte(MAX_VOLTAGE), lowByte(MAX_VOLTAGE), highByte(MAX_AMPS), lowByte(MAX_AMPS), 0x00, 0x00, 0x00, 0x00}; // Regenerate the message
+  unsigned char voltamp[8] = {highByte(Config::getMaxVoltage()), lowByte(Config::getMaxVoltage()), highByte(Config::getMaxCurrent()), lowByte(Config::getMaxCurrent()), 0x00, 0x00, 0x00, 0x00}; // Regenerate the message
   String canWriteVal = canWrite(voltamp, tcc_incoming_can_id);                                                                                  // Send message and output results
   canRead();                                                                                                                               // Call read function of charger
 
@@ -200,6 +199,8 @@ void tccHandler()
 void setup()
 {
   Serial.begin(SERIAL_SPEED);
+  
+  serialConsole = new SerialConsole();
 
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(ORANGE_PIN, OUTPUT);
@@ -211,7 +212,7 @@ void setup()
 
   delay(2000);
 
-  while (CAN_OK != CAN.begin(CAN_500KBPS))
+  while (CAN_OK != CAN.begin(Config::getCanSpeed()))
   {
     Logger::log("waiting for CAN to intialize");
     digitalWrite(ORANGE_PIN, !digitalRead(ORANGE_PIN));
@@ -225,7 +226,8 @@ void setup()
   timer.setInterval(led_reset_interval, ledHandler);
 }
 
-void loop() // ----------------------------LOOP------------------------------//
+void loop()
 {
   timer.run();
+	serialConsole->loop();
 }
