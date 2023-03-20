@@ -12,10 +12,13 @@ unsigned char buf[8];  // Buffer for data from CAN message of either charger
 int error_state = 0;
 float pv_voltage;
 float pv_current;
+bool isCharging = true;
 
 mcp2515_can CAN(SPI_CS_PIN);
 SimpleTimer timer;
 SerialConsole *serialConsole;
+
+unsigned long charge_start_time;
 
 void canRead()
 {
@@ -103,6 +106,12 @@ String canWrite(unsigned char data[8], unsigned long int id)
 
 void ledHandler()
 {
+
+  if ( isCharging == false) {
+    blinkIndicatorLeds(10);
+    return;
+  }
+
   switch (error_state)
   { // Read out error byte
 
@@ -183,17 +192,34 @@ void setIndicatorLeds()
   }
 }
 
+bool checkTimer(){
+  unsigned long running_time = (millis() - charge_start_time) / 1000;
+  if( Config::getMaxChargeTime() == 0) {
+    return true;
+  }
+  if (running_time > Config::getMaxChargeTime()) {
+    return false;
+  }
+  return true;
+}
+
 void tccHandler()
 { // Cyclic function called by the timer
 
   Logger::log("Set individual charging current: %f A . Target Charging Voltage: %f V ",(float)Config::getMaxCurrent() / 10.0, (float)Config::getMaxVoltage() / 10.0 ); 
 
+  isCharging = checkTimer();
+  char enableBit = isCharging ? 0x00 :0x01;
+
   // Send message and output results
-  unsigned char voltamp[8] = {highByte(Config::getMaxVoltage()), lowByte(Config::getMaxVoltage()), highByte(Config::getMaxCurrent()), lowByte(Config::getMaxCurrent()), 0x00, 0x00, 0x00, 0x00}; // Regenerate the message
+  unsigned char voltamp[8] = {highByte(Config::getMaxVoltage()), lowByte(Config::getMaxVoltage()), highByte(Config::getMaxCurrent()), lowByte(Config::getMaxCurrent()), enableBit, 0x00, 0x00, 0x00}; // Regenerate the message
   String canWriteVal = canWrite(voltamp, tcc_incoming_can_id);                                                                                  // Send message and output results
   canRead();                                                                                                                               // Call read function of charger
 
   Logger::log("canWrite result: %s", canWriteVal); // Print a blank line
+  if (Config::getMaxChargeTime() != 0) {
+   Logger::log("Running time limit enabled, current time: %d s",(millis()-charge_start_time)/1000);
+  }
 }
 
 void setup()
@@ -218,6 +244,8 @@ void setup()
     digitalWrite(ORANGE_PIN, !digitalRead(ORANGE_PIN));
     delay(200);
   }
+
+  charge_start_time = millis();
   digitalWrite(ORANGE_PIN, LOW);
   digitalWrite(GREEN_PIN, HIGH);
 
