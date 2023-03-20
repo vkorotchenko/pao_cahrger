@@ -2,23 +2,10 @@
 
 Logger::LogLevel Logger::logLevel = Logger::Info;
 
-/*
- * Set the log level. Any output below the specified log level will be omitted.
- */
 void Logger::setLoglevel(LogLevel level) {
     logLevel = level;
 }
 
-/*
- * Returns if debug log level is enabled. This can be used in time critical
- * situations to prevent unnecessary string concatenation (if the message won't
- * be logged in the end).
- *
- * Example:
- * if (Logger::isDebug()) {
- *    Logger::debug("current time: %d", millis());
- * }
- */
 boolean Logger::isDebug() {
     return logLevel == Debug;
 }
@@ -42,6 +29,34 @@ boolean Logger::isDebug() {
  * %T - prints the next parameter as boolean ('true' or 'false')
  */
 void Logger::log(const char *message, ...) {
+      if (!Logger::isDebug()) {
+        return;
+    }
+    va_list args;
+    va_start(args, message);
+    Logger::logMessage(message, args);
+    va_end(args);
+}
+
+/*
+ * Output a log message (called by log(), console())
+ *
+ * Supports printf() like syntax:
+ *
+ * %% - outputs a '%' character
+ * %s - prints the next parameter as string
+ * %d - prints the next parameter as decimal
+ * %f - prints the next parameter as double float
+ * %x - prints the next parameter as hex value
+ * %X - prints the next parameter as hex value with '0x' added before
+ * %b - prints the next parameter as binary value
+ * %B - prints the next parameter as binary value with '0b' added before
+ * %l - prints the next parameter as long
+ * %c - prints the next parameter as a character
+ * %t - prints the next parameter as boolean ('T' or 'F')
+ * %T - prints the next parameter as boolean ('true' or 'false')
+ */
+void Logger::print(const char *message, ...) {
     va_list args;
     va_start(args, message);
     Logger::logMessage(message, args);
@@ -49,10 +64,6 @@ void Logger::log(const char *message, ...) {
 }
 
 void Logger::logMessage(const char *format, va_list args) {
-    if (!Logger::isDebug()) {
-        return;
-    }
-    
     for (; *format != 0; ++format) {
         if (*format == '%') {
             ++format;

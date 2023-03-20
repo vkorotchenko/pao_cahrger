@@ -32,11 +32,12 @@
 class Logger {
 public:
     enum LogLevel {
-        Debug = 0, Info = 1
+        Debug = 1, Info = 0
     };
     static void setLoglevel(LogLevel);
     static boolean isDebug();
     static void log(const char *, ...);
+    static void print(const char *, ...);
 private:
     static LogLevel logLevel;
     static uint32_t lastLogTime;
