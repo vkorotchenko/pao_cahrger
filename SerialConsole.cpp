@@ -202,6 +202,6 @@ void SerialConsole::printHelpMenu()
     Logger::print("VOLT : Setting nominal voltage (tenth of a volt) 320.1 V: `VOLT=3201`");
     Logger::print("AMP : Setting max charge current (tenth of an Amp) 20.1 Amp: `AMP=201`");
     Logger::print("DEBUG : Set debug mode, value is not persisted default to off on boot: on: `DEBUG=1` off: DEBUG=0");
-    Logger::print("TARGET : set target charging percentage. 90.5% : `TARGET=905`");
+    Logger::print("TARGET : set target charging percentage. 90.5% 0 t0 disable : `TARGET=905`");
     Logger::print("MAX_TIME : Set max charging time (seconds) 0 to disable: 23h 26m 13s: `MAX_TIME=84373`");
 }
