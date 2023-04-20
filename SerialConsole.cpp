@@ -3,7 +3,7 @@
 template <class T>
 inline Print &operator<<(Print &obj, T arg)
 {
-    obj.print(arg);
+    obj.print(F(arg));
     return obj;
 }
 
@@ -27,7 +27,6 @@ void SerialConsole::init()
 
 void SerialConsole::loop()
 {
-
     if (handlingEvent == false)
     {
         if (Serial.available())
@@ -154,9 +153,13 @@ void SerialConsole::handleConfigCmd()
         if (newValue < 0 || newValue > 1)
         {
             Logger::print("Please enter a value between 0 and 1");
+        } else  if ( newValue == 0) {
+            Logger::setInfo();
+        } else {
+            Logger::setDebug();
         }
+
         Logger::print("Setting debug mode to %t", newValue);
-        Logger::setLoglevel(newValue);
     }
     else if (cmdString == String("TARGET"))
     {

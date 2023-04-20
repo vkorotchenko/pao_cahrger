@@ -28,16 +28,21 @@
 #define LOGGER_H_
 
 #include <Arduino.h>
+#include <SPI.h>
 
 class Logger {
 public:
     enum LogLevel {
         Debug = 1, Info = 0
     };
-    static void setLoglevel(LogLevel);
+    static void setDebug();
+    static void setInfo();
     static boolean isDebug();
     static void log(const char *, ...);
     static void print(const char *, ...);
+    // static void logMessage(const char *, ...);
+    static void logIncomingMsg(unsigned long id, byte ext, byte len, float tVolt, float tAmp);
+    static void logOutgoingMsg(unsigned long id, byte ext, byte len, float tVolt, int tAmp);
 private:
     static LogLevel logLevel;
     static uint32_t lastLogTime;
