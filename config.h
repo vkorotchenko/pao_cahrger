@@ -12,8 +12,8 @@ PINS
 #define GREEN_PIN 12
 #define ORANGE_PIN 13
 #define RED_PIN 14
-#define SPI_CS_PIN 9 // CS Pins
-
+#define SPI_CS_PIN 5 // CS Pins
+#define CAN_INT_PIN = 6;
 /*
  * SERIAL CONFIGURATION
  */
@@ -38,9 +38,9 @@ PINS
 
 #define CAN_SPEED 16          // can speed in 1000 kbps
 #define NOMINAL_VOLTAGE 3200  // nominal volatage for the battery pack in 1/10th of a volt
-#define TARGET_PERCENTAGE 950 // if we are limiting charging to x percente for battery life protection in thenth of a percent  0 to disable
+#define TARGET_PERCENTAGE 0.95 // if we are limiting charging to x percente for battery life protection in thenth of a percent  1 to disable
 #define MAX_AMPS 200          // Max amp for the charger in 1/10 of an AMP
-#define MAX_CHARGE_TIME 0   // time in seconds before shutting off, 0 to disable 
+#define MAX_CHARGE_TIME 43200   // time in seconds before shutting off, 0 to disable 
 
 /*
     EEPROM ADDRESSES
@@ -51,18 +51,18 @@ PINS
 #define EEPROM_MAX_CHARGE_TIME 18
 #define EEPROM_TARGET_PERCENTAGE 20
 
-#include "EEPROM.h"
+#include <FlashAsEEPROM.h>
 #include "Logger.h"
 
 class Config
 {
 public:
-    static int getMaxVoltage();
-    static int getMinVoltage();
+    static float getMaxVoltage();
+    static float getMinVoltage();
     static int getNominalVoltage();
     static int getMaxCurrent();
     static int getCanSpeed();
-    static int getTargetPercentage();
+    static float getTargetPercentage();
     static int getMaxChargeTime();
     static int getTargetVoltage();
 
@@ -70,7 +70,7 @@ public:
     static void setNominalVoltage(int newValue);
     static void setMaxCurrent(int newValue);
     static void setCanSpeed(int newValue);
-    static void setTargetPercentage(int newValue);
+    static void setTargetPercentage(float newValue);
     static void setMaxChargeTime(int newValue);
 
 private:

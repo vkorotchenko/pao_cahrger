@@ -1,11 +1,11 @@
 #include "Config.h"
 
-int Config::getMaxVoltage()
+float Config::getMaxVoltage()
 {
     return Config::getNominalVoltage() * NOMINAL_MAX_MULTIPLIER;
 }
 
-int Config::getMinVoltage()
+float Config::getMinVoltage()
 {
     return Config::getNominalVoltage() * NOMINAL_MIN_MULTIPLIER;
 }
@@ -24,9 +24,9 @@ int Config::getCanSpeed()
     return Config::getValueFromEEPROM(CAN_SPEED, EEPROM_CAN_SPEED);
 }
 
-int Config::getTargetPercentage()
+float Config::getTargetPercentage()
 {
-    return Config::getValueFromEEPROM(TARGET_PERCENTAGE, EEPROM_TARGET_PERCENTAGE);
+    return TARGET_PERCENTAGE;
 }
 
 int Config::getMaxChargeTime()
@@ -36,28 +36,25 @@ int Config::getMaxChargeTime()
 
 int Config::getValueFromEEPROM(int def,int addr ) {
     int target = def;
-    EEPROM.get(addr, target);
-    if ( target == DEFAULT_EEPROM_VAL) {
-        return def;
-    }
-    return target;
+    // target = EEPROM.read(addr);
+    // if ( target == DEFAULT_EEPROM_VAL) {
+    //     return def;
+    // }
+    return def;
 }
 
 int Config::getTargetVoltage() {
-    if(Config::getTargetPercentage() == 0) {
-        return Config::getMaxVoltage();
-    }
-    return Config::getMaxVoltage() * (Config::getTargetPercentage() / 1000);
+    return ceil(Config::getMaxVoltage() * Config::getTargetPercentage());
 }
 
 void Config::printAllValues()
 {
     Logger::print("=== EEPROM values ===");
-    Logger::print("Nominal Voltage: %f  V", (float)Config::getNominalVoltage() / 10.0);
-    Logger::print("Max Current: %f A", (float)Config::getMaxCurrent() / 10.0);
+    Logger::print("Nominal Voltage: %d  V", Config::getNominalVoltage() / 10.0);
+    Logger::print("Max Current: %d A", Config::getMaxCurrent() / 10.0);
     Logger::print("Can speed: %d", Config::getCanSpeed());
-    Logger::print("Percentage target ( no used): %d  %", Config::getTargetPercentage());
-    Logger::print("Max Charge time ( not used): %d s", Config::getMaxChargeTime());
+    Logger::print("Percentage target: %d  %", Config::getTargetPercentage());
+    Logger::print("Max Charge time: %d s", Config::getMaxChargeTime());
 }
 
 void Config::setNominalVoltage(int newValue)
@@ -74,7 +71,7 @@ void Config::setCanSpeed(int newValue)
     EEPROM.update(EEPROM_CAN_SPEED, newValue);
 }
 
-void Config::setTargetPercentage(int newValue)
+void Config::setTargetPercentage(float newValue)
 {
     EEPROM.update(EEPROM_TARGET_PERCENTAGE, newValue);
 }
