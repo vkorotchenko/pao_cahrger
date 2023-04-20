@@ -3,6 +3,7 @@
 #include "Logger.h"
 #include "Config.h"
 #include "led.h"
+#include "ble.h"
 #include "SerialConsole.h"
 #include <SPI.h>
 
@@ -25,6 +26,7 @@ float pv_current;
 bool isCharging = true;
 
 Led *led;
+Ble *bt;
 
 #include "mcp2515_can.h"
 mcp2515_can CAN(SPI_CS_PIN); // Set CS pin
@@ -142,6 +144,10 @@ void setup()
   //serialConsole = new SerialConsole();
   led = new Led(GREEN_PIN, ORANGE_PIN, RED_PIN);
   led->setup();
+
+  bt = new Ble();
+  bt->setup();
+
   while (CAN_OK != CAN.begin(Config::getCanSpeed()))
   {
     Logger::log("waiting for CAN to intialize");
@@ -160,5 +166,6 @@ void loop()
   
 	//serialConsole->loop();
   led->loop(error_state, getSOC());
+  bt->loop(Config::getTargetVoltage(), Config::getMaxCurrent(), pv_voltage, pv_current);
   canRead();
 }

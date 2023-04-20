@@ -41,6 +41,7 @@ PINS
 #define TARGET_PERCENTAGE 0.95 // if we are limiting charging to x percente for battery life protection in thenth of a percent  1 to disable
 #define MAX_AMPS 200          // Max amp for the charger in 1/10 of an AMP
 #define MAX_CHARGE_TIME 43200   // time in seconds before shutting off, 0 to disable 
+#define DISPLAY_NAME "Pao Charger" //ble name
 
 /*
     EEPROM ADDRESSES
