@@ -158,6 +158,11 @@ void setup()
 
   Logger::log("CAN initialization successful");
   timer.setInterval(tcc_send_interval, canWrite);
+  timer.setInterval(ble_interval, send_ble_info);
+}
+
+void send_ble_info(){
+  bt->loop(Config::getTargetVoltage(), Config::getMaxCurrent(), ceil(pv_voltage * 10), ceil(pv_current * 10));
 }
 
 void loop()
@@ -166,6 +171,5 @@ void loop()
   
 	//serialConsole->loop();
   led->loop(error_state, getSOC());
-  bt->loop(Config::getTargetVoltage(), Config::getMaxCurrent(), pv_voltage, pv_current);
   canRead();
 }

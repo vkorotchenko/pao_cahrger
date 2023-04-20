@@ -23,6 +23,7 @@ PINS
 #define tcc_incoming_can_id 0x1806E5F4
 #define tcc_outgoing_can_id 0x18FF50E5
 #define tcc_send_interval 1000
+#define ble_interval 1000
 #define led_reset_interval 1000
 
 #define FULL_CHARGE_MULTIPLIER 1.046875
