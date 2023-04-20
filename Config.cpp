@@ -24,9 +24,9 @@ int Config::getCanSpeed()
     return Config::getValueFromEEPROM(CAN_SPEED, EEPROM_CAN_SPEED);
 }
 
-int Config::getTargetPercentage()
+float Config::getTargetPercentage()
 {
-    return Config::getValueFromEEPROM(TARGET_PERCENTAGE, EEPROM_TARGET_PERCENTAGE);
+    return TARGET_PERCENTAGE;
 }
 
 int Config::getMaxChargeTime()
@@ -44,11 +44,7 @@ int Config::getValueFromEEPROM(int def,int addr ) {
 }
 
 int Config::getTargetVoltage() {
-    if(Config::getTargetPercentage() == 0) {
-
-        return floor(Config::getMaxVoltage());
-    }
-    return floor(Config::getMaxVoltage() * (Config::getTargetPercentage() / 1000));
+    return ceil(Config::getMaxVoltage() * Config::getTargetPercentage());
 }
 
 void Config::printAllValues()
@@ -75,7 +71,7 @@ void Config::setCanSpeed(int newValue)
     EEPROM.update(EEPROM_CAN_SPEED, newValue);
 }
 
-void Config::setTargetPercentage(int newValue)
+void Config::setTargetPercentage(float newValue)
 {
     EEPROM.update(EEPROM_TARGET_PERCENTAGE, newValue);
 }
