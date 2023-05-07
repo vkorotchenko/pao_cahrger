@@ -16,7 +16,7 @@
 class Ble {
 public:
     void setup();
-    void loop(int tVolt, int tAmp, int cVolt, int cAmp);
+    void loop(int tVolt, int tAmp, int cVolt, int cAmp, unsigned long running_time);
 private:
 };
 

@@ -6,6 +6,7 @@ int32_t tVoltId;
 int32_t tAmpId;
 int32_t cVoltId;
 int32_t cAmpId;
+int32_t rTime;
 
 void Ble::setup() {
 
@@ -37,7 +38,7 @@ void Ble::setup() {
   /* Add the Service definition */
   /* Service ID should be 1 */
   Logger::log("Adding the Service definition (UUID = 0x27B0): ");
-  bool success = ble.sendCommandWithIntReply( F("AT+GATTADDSERVICE=UUID=0x27B0"), &serviceId);
+  bool success = ble.sendCommandWithIntReply( F("AT+GATTADDSERVICE=UUID=0x180F"), &serviceId);
   if (! success) {
     Logger::log("Could not add service");
   }
@@ -50,13 +51,17 @@ void Ble::setup() {
   if (! success) {
     Logger::log("Could not add char2");
   }
-  success = ble.sendCommandWithIntReply( F("AT+GATTADDCHAR=UUID=0x2A38, PROPERTIES=0x10, MIN_LEN=1, MAX_LEN=5, VALUE=0"), &cVoltId);
+  success = ble.sendCommandWithIntReply( F("AT+GATTADDCHAR=UUID=0x2BED, PROPERTIES=0x10, MIN_LEN=1, MAX_LEN=5, VALUE=0"), &cVoltId);
   if (! success) {
     Logger::log("Could not add char3");
   }
-  success = ble.sendCommandWithIntReply( F("AT+GATTADDCHAR=UUID=0x2A39, PROPERTIES=0x10, MIN_LEN=1, MAX_LEN=5, VALUE=0"), &cAmpId);
+  success = ble.sendCommandWithIntReply( F("AT+GATTADDCHAR=UUID=0x2BF0, PROPERTIES=0x10, MIN_LEN=1, MAX_LEN=5, VALUE=0"), &cAmpId);
   if (! success) {
     Logger::log("Could not add char4");
+  }
+  success = ble.sendCommandWithIntReply( F("AT+GATTADDCHAR=UUID=0x2BEE, PROPERTIES=0x10, MIN_LEN=1, MAX_LEN=10, VALUE=0"), &rTime);
+  if (! success) {
+    Logger::log("Could not add char5");
   }
 
 
@@ -67,7 +72,7 @@ void Ble::setup() {
   ble.reset();
 }
 
-void Ble::loop(int tVolt, int tAmp, int cVolt, int cAmp){
+void Ble::loop(int tVolt, int tAmp, int cVolt, int cAmp, unsigned long running_time){
   ble.print( F("AT+GATTCHAR=") );
   ble.print( tVoltId );
   ble.print( F(",") );
@@ -87,4 +92,9 @@ void Ble::loop(int tVolt, int tAmp, int cVolt, int cAmp){
   ble.print( cAmpId );
   ble.print( F(",") );
   ble.println(cAmp, HEX);
+  
+  ble.print( F("AT+GATTCHAR=") );
+  ble.print( rTime );
+  ble.print( F(",") );
+  ble.println(running_time, HEX);
 }

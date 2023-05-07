@@ -10,6 +10,7 @@ public:
     void loop(int errorState, int soc);
 private:
     void blinkIndicatorLeds(int count);
+    void blinkIndicatorLeds(int pin, int count);
     void ledHandler(int errorState, int soc);
     void setIndicatorLeds(int soc);
     int greenPin;

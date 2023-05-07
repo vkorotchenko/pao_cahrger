@@ -23,6 +23,7 @@ unsigned char voltamp[8] = {highByte(Config::getTargetVoltage()), lowByte(Config
 int error_state = 0;
 float pv_voltage;
 float pv_current;
+unsigned long running_time;
 bool isCharging = true;
 
 Led *led;
@@ -39,20 +40,23 @@ unsigned long charge_start_time;
 
 int getSOC()
 {
-  if ( pv_voltage < Config::getNominalVoltage() * MID_CHARGE_MULTIPLIER) {
+  if ( pv_voltage < Config::getTargetVoltage() * MID_CHARGE_MULTIPLIER) {
     return 1;
   }
   if ( pv_voltage < Config::getNominalVoltage() * FULL_CHARGE_MULTIPLIER) {
     return 2;
   }
-  if ( pv_voltage > Config::getNominalVoltage() * FULL_CHARGE_MULTIPLIER) {
+  if ( pv_voltage >= Config::getTargetVoltage() * FULL_CHARGE_MULTIPLIER  * .90  && ( pv_voltage < Config::getTargetVoltage() * FULL_CHARGE_MULTIPLIER  * .98)) {
     return 3;
+  }
+  if ( pv_voltage >= Config::getTargetVoltage() * FULL_CHARGE_MULTIPLIER  * .98) {
+    return 4;
   }
   return 0;
 }
 
 bool checkTimer(){
-  unsigned long running_time = (millis() - charge_start_time) / 1000;
+  running_time = (millis() - charge_start_time) / 1000;
   if( Config::getMaxChargeTime() == 0) {
     return true;
   }
@@ -162,14 +166,14 @@ void setup()
 }
 
 void send_ble_info(){
-  bt->loop(Config::getTargetVoltage(), Config::getMaxCurrent(), ceil(pv_voltage * 10), ceil(pv_current * 10));
+  bt->loop(Config::getTargetVoltage(), Config::getMaxCurrent(), ceil(pv_voltage * 10), ceil(pv_current * 10), running_time );
 }
 
 void loop()
 {
   timer.run();
   
-	//serialConsole->loop();
+	serialConsole->loop();
   led->loop(error_state, getSOC());
   canRead();
 }

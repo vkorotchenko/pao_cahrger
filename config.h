@@ -9,9 +9,9 @@
 PINS
 */
 
-#define GREEN_PIN 12
-#define ORANGE_PIN 13
-#define RED_PIN 14
+#define GREEN_PIN A0
+#define ORANGE_PIN A1
+#define RED_PIN A2
 #define SPI_CS_PIN 5 // CS Pins
 #define CAN_INT_PIN = 6;
 /*
