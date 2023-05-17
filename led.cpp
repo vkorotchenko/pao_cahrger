@@ -1,6 +1,6 @@
 #include "led.h"
 
-Led::Led(int green, int amber, int red) {
+Led:: Led(int green, int amber, int red) {
     greenPin = green;
     amberPin = amber;
     redPin = red;
@@ -12,9 +12,9 @@ void Led::setup()
   pinMode(amberPin, OUTPUT);
   pinMode(redPin, OUTPUT);
 
-  digitalWrite(greenPin, LOW);
+  digitalWrite(greenPin, HIGH);
   digitalWrite(amberPin, LOW);
-  digitalWrite(redPin, LOW);
+  digitalWrite(redPin, HIGH);
 }
 
 void Led::loop(int errorState, int soc){
@@ -46,9 +46,6 @@ void Led::ledHandler(int errorState, int soc)
   case B00001100:
     blinkIndicatorLeds(6);
     break;
-  case B00100000:
-    blinkIndicatorLeds(7);
-    break;
   default:
     setIndicatorLeds(soc);
     break;
@@ -61,16 +58,25 @@ void Led::setIndicatorLeds(int soc)
   digitalWrite(amberPin, LOW);
   digitalWrite(redPin, LOW);
 
-  if (soc < 1)
+  if (soc == 1)
+  {
+    Led::blinkIndicatorLeds(redPin, 2);
+  }
+  if (soc == 2)
   {
     digitalWrite(redPin, HIGH);
+    Led::blinkIndicatorLeds(amberPin, 2);
   }
-  if (soc < 2)
+  if (soc == 3)
   {
+    digitalWrite(redPin, HIGH);
     digitalWrite(amberPin, HIGH);
+    Led::blinkIndicatorLeds(greenPin, 2);
   }
-  if (soc < 3)
+  if (soc == 4)
   {
+    digitalWrite(redPin, HIGH);
+    digitalWrite(amberPin, HIGH);
     digitalWrite(greenPin, HIGH);
   }
 }
@@ -87,6 +93,17 @@ void Led::blinkIndicatorLeds(int count)
     digitalWrite(amberPin, HIGH);
     delay(200);
     digitalWrite(amberPin, LOW);
+    delay(200);
+  }
+}
+
+void Led::blinkIndicatorLeds(int pin, int count)
+{
+  for (int i = 0; i < count; i++)
+  {
+    digitalWrite(pin, HIGH);
+    delay(200);
+    digitalWrite(pin, LOW);
     delay(200);
   }
 }

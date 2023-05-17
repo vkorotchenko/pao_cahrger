@@ -9,9 +9,9 @@
 PINS
 */
 
-#define GREEN_PIN 12
-#define ORANGE_PIN 13
-#define RED_PIN 14
+#define GREEN_PIN A0
+#define ORANGE_PIN A1
+#define RED_PIN A2
 #define SPI_CS_PIN 5 // CS Pins
 #define CAN_INT_PIN = 6;
 /*
@@ -23,6 +23,7 @@ PINS
 #define tcc_incoming_can_id 0x1806E5F4
 #define tcc_outgoing_can_id 0x18FF50E5
 #define tcc_send_interval 1000
+#define ble_interval 1000
 #define led_reset_interval 1000
 
 #define FULL_CHARGE_MULTIPLIER 1.046875
@@ -41,6 +42,7 @@ PINS
 #define TARGET_PERCENTAGE 0.95 // if we are limiting charging to x percente for battery life protection in thenth of a percent  1 to disable
 #define MAX_AMPS 200          // Max amp for the charger in 1/10 of an AMP
 #define MAX_CHARGE_TIME 43200   // time in seconds before shutting off, 0 to disable 
+#define DISPLAY_NAME "Pao Charger" //ble name
 
 /*
     EEPROM ADDRESSES
