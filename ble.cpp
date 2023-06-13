@@ -38,7 +38,7 @@ void Ble::setup() {
   /* Add the Service definition */
   /* Service ID should be 1 */
   Logger::log("Adding the Service definition (UUID = 0x27B0): ");
-  bool success = ble.sendCommandWithIntReply( F("AT+GATTADDSERVICE=UUID=0x180F"), &serviceId);
+  bool success = ble.sendCommandWithIntReply( F("AT+GATTADDSERVICE=UUID=0x27B0"), &serviceId);
   if (! success) {
     Logger::log("Could not add service");
   }
